@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<title>Fedora</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="https://800147.github.io/documents/lib/favicon.svg" />
+<meta name="color-scheme" content="light dark" />
+<link rel="stylesheet" href="https://800147.github.io/tools/src/Document/Document.css" />
+<script type="module" src="https://800147.github.io/documents/lib/md-reader.js"></script>
+</head>
+<body>
+<noscript>
+<nav class="Document-Breadcrumbs">
+
+* [Документы](./)
+
+</nav>
+
+# Fedora
+
+## Установка
+
+### Загрузочная флешка
+Ventoy есть под все платформы, работает со всеми установочниками
+
+https://ventoy.net/en/index.html
+
+### UEFI
+Для UEFI диск должен быть размечен методом GPT и на нём должны присутствовать два раздела:
+
+* ~100mb Fat32 с типом раздела EFI System и точкой монтирования /boot/efi
+* \>=512mb с обычной файловой системой и точкой монтирования /boot
+
+## Устройства
+
+### TP-Link Archer-T2U
+Подходит и для Archer-T4U
+
+Нужен DKMS
+
+https://github.com/aircrack-ng/rtl8812au.git
+```
+git clone -b v5.6.4.2 https://github.com/aircrack-ng/rtl8812au.git
+cd rtl*
+```
+
+```
+git clone https://github.com/aircrack-ng/rtl8812au.git
+cd rtl8812au
+sudo make dkms_install
+```
+
+Отключаем лампочку:
+```
+sudo touch /etc/modprobe.d/8812au.conf
+sudo nano /etc/modprobe.d/8812au.conf
+options 88XXau rtw_led_ctrl=0
+```
+
+### Keychrone k1 v4
+https://github.com/adam-savard/keychron-k2-function-keys-linux
+
+## Настройки
+
+### Вход без пароля
+https://www.reddit.com/r/Fedora/comments/q9t9f0/logging_in_without_entering_the_password_for_the/
+
+* В настройках пользователя выставить галку «Автоматический вход»
+* Установить приложение «Пароли и ключи» и там сбросить пароль для связки ключей (потом на неё будет ругань при смене пароля пользователя)
+
+### VPN
+Настраивается через системные настройки Сеть > VPN
+
+Через приложение `nm-connection-editor` можно настроить автозапуск VPN для определённых соединений
+
+### PEAP соединение
+Если не получается подключиться к старому роутеру с PEAP защитой (постоянно просит ввести пароль), можно отключить новые настройки криптографии
+```
+sudo update-crypto-policies --set legacy
+```
+
+https://bugzilla.redhat.com/show_bug.cgi?id=2072070
+
+### RDP
+Параметры > Общий доступ > Удалённый рабочий стол
+
+Надо включить и настроить доступ. Клиенту подключаться по ip адресу.
+
+Чтобы включить режим расширения экрана (дополнительный монитор), надо ввести команду:
+```
+gsettings set org.gnome.desktop.remote-desktop.rdp screen-share-mode extend
+```
+https://www.omgubuntu.co.uk/2022/06/use-ipad-as-second-monitor-ubuntu-22-04
+
+### Кодеки
+Нужен RPM Fusion
+
+https://linux-faq.ru/page/uluchshenie-podderghki-multimediynih-formatov-v-fedora-workstation
+
+```
+sudo dnf install gstreamer1-libav gstreamer1-plugins-bad-free-extras gstreamer1-plugins-bad-freeworld gstreamer1-plugins-base-tools gstreamer1-plugins-good-extras gstreamer1-plugins-ugly gstreamer1-plugins-bad-free gstreamer1-plugins-good gstreamer1-plugins-base
+```
+
+### Яндекс Диск в Nautilus
+Адрес сервера: **davs://webdav.yandex.ru**
+
+Нужно будет указать логин (можно без @yandex.ru) и пароль.
+
+### Яндекс Почта в Geary
+Входящая почта IMAP
+
+* адрес почтового сервера: **imap.yandex.ru**
+* защита соединения: **SSL**
+* порт: **993**
+
+Исходящая почта SMPT
+
+* адрес почтового сервера: **smtp.yandex.ru**
+* защита соединения: **SSL**
+* порт: **465**
+
+Или добавить IMAP и SMTP в настройках сетевых учётных записей, выбрав SSL для шифрования
+
+### Яндекс Календарь
+Протокол calDAV
+
+Адрес: **https://caldav.yandex.ru**
+
+Логин можно указывать без @yandex.ru
+
+
+### DKMS
+Позволяет автоматически устанавливать модули ядра после его обновления. Нужен для простой установки драйверов
+
+```
+sudo dnf install dkms kernel-devel kernel-headers
+```
+
+Без kernel-devel и kernel-headers будет выходить ошибка про потерянные хедеры
+
+### GSConnect не подключается при старте
+Создать в `~/.config/autostart/` файл `gs-connect-ring-autostart.desktop` с содержимым:
+```
+[Desktop Entry]
+# Add this file to ~/.config/autostart/ folder to autostart GS Connect
+Name=GS Connect ring
+Exec=bash -c "sleep 7; ~/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/service/daemon.js --ring"
+Type=Application
+Terminal=false
+StartupNotify=true
+NoDisplay=true
+```
+
+## Источники приложений
+### RPM Fusion
+Включен по умолчанию, если выставить галку "сторонние источники" при установке (https://tecadmin.net/install-ffmpeg-on-fedora/)
+
+```
+sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+```
+
+### Flathub
+Flatpack установлен по умолчанию и даже flathub указан, как включённый (если выставить галку "сторонние источники" при установке), но он не работает, и надо устанавливать его по инструкции https://flatpak.org/setup/Fedora/
+
+```
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+```
+
+### Snap
+https://snapcraft.io/docs/installing-snap-on-fedora
+
+```
+sudo dnf install snapd
+sudo ln -s /var/lib/snapd/snap /snap
+```
+
+Snap Store:
+
+```
+sudo snap install snap-store
+```
+
+Настроить отображение snap-пакетов в стандартном магазине приложений не получилось
+
+## Приложения
+
+### FFmpeg
+Нужен RPM Fusion
+
+https://tecadmin.net/install-ffmpeg-on-fedora/
+
+```
+sudo dnf install ffmpeg ffmpeg-devel
+```
+
+### Git
+Установлен из коробки
+
+#### Github
+https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
+
+```
+ssh-keygen -t rsa -b 4096 -C "800147@gmail.com"
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_rsa
+sudo gedit ~/.ssh/id_rsa.pub
+```
+
+https://github.com/settings/keys
+
+```
+git clone <ssh адрес репозитория>
+```
+
+#### Git LFS
+```
+sudo dnf install git-lfs
+git lfs install
+```
+
+Внутри проекта:
+
+```
+git-lfs pull
+```
+
+### Npm
+
+#### NVM
+https://github.com/nvm-sh/nvm
+
+```
+wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+```
+
+### PostgreSQL
+https://docs.fedoraproject.org/en-US/quick-docs/postgresql/
+
+```
+sudo dnf install postgresql-server postgresql-contrib
+sudo postgresql-setup --initdb --unit postgresql
+sudo nano /var/lib/pgsql/data/pg_hba.conf
+```
+
+Заменяем строку — выставляем trust вместо ident
+```
+# host all all 127.0.0.1/32 ident
+host all all 127.0.0.1/32 trust
+```
+
+Перезагружаемся
+
+Для запуска
+```
+sudo systemctl start postgresql
+```
+
+Для автозапуска
+```
+sudo systemctl enable postgresql
+```
+
+### Docker
+https://docs.docker.com/engine/install/fedora/
+
+Если уже устанавливался другими методами, то надо удалить старые версии https://docs.docker.com/engine/install/fedora/#uninstall-old-versions
+
+```
+sudo dnf -y install dnf-plugins-core
+sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+sudo dnf install docker-ce docker-ce-cli containerd.io
+sudo systemctl start docker
+```
+
+https://stackoverflow.com/questions/48957195/how-to-fix-docker-got-permission-denied-issue
+
+https://stackoverflow.com/questions/34471074/cannot-connect-to-the-docker-daemon-is-the-docker-daemon-running-on-this-host
+
+#### Через Snap
+```
+sudo snap install docker --edge
+sudo groupadd --system docker
+sudo gpasswd -a ${USER} docker
+newgrp docker
+sudo snap disable docker
+sudo snap enable docker
+```
+
+#### Docker-compose
+```
+sudo dnf install docker-compose
+```
+</noscript>
+</body>
+</html>

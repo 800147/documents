@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<title>Windows</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="https://800147.github.io/documents/lib/favicon.svg" />
+<meta name="color-scheme" content="light dark" />
+<link rel="stylesheet" href="https://800147.github.io/tools/src/Document/Document.css" />
+<script type="module" src="https://800147.github.io/documents/lib/md-reader.js"></script>
+</head>
+<body>
+<noscript>
+<nav class="Document-Breadcrumbs">
+
+* [Документы](./)
+
+</nav>
+
+# Windows
+
+## Установка
+
+### Загрузочная флешка
+Ventoy есть под все платформы, работает со всеми установочниками
+
+https://ventoy.net/en/index.html
+
+### Установка на неподдерживаемое устройство
+При установке, прямо в установщике надо запустить консоль (Shift + F10) и 
+ввести: 
+
+```
+regedit
+```
+
+В открывшемся редакторе реестра перейти к __HKEY_LOCAL_MACHINE\SYSTEM\Setup__
+
+Потом через __edit > new > key__ создать ключ с именем «LabConfig» и перейти к 
+нему.
+
+Внутри созданного ключа через __edit > new > DWORD (32-bit) Value__ создать
+следующие параметры со значением «1»:
+
+* BypassTPMCheck
+* BypassSecureBootCheck
+* BypassRAMCheck
+  
+Теперь закрыть редактор реестра и консоль и продолжить установку обычным
+образом.
+
+https://www.tomshardware.com/how-to/bypass-windows-11-tpm-requirement
+</noscript>
+</body>
+</html>
